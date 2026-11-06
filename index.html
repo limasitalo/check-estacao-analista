@@ -30,7 +30,7 @@ header.top{display:flex;align-items:center;gap:16px;padding:10px 20px;background
 .step.done{color:var(--accent)}
 .step.done::before{content:"✓ "}
 main{display:grid;grid-template-columns:minmax(300px,1fr) minmax(340px,1.15fr) minmax(360px,1.3fr);gap:14px;padding:14px 20px 20px}
-@media (max-width:1100px){main{grid-template-columns:1fr}}
+@media (max-width:1100px){main{grid-template-columns:minmax(0,1fr)}.panel{min-width:0}}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-height:0}
 .panel>h2{margin:0;padding:12px 16px;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink2);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
 .panel>h2 .n{background:var(--ink);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-grid;place-items:center;font-size:11px}
@@ -89,6 +89,15 @@ h3{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted
 .audit th,.audit td{text-align:left;padding:6px 16px;border-top:1px solid var(--line)}
 .audit th{color:var(--muted);font-weight:600}
 footer{padding:0 20px 24px;font-size:12px;color:var(--muted)}
+.fb{display:flex;gap:6px;align-items:center;margin-top:8px;padding-top:6px;border-top:1px dashed #cfd6df;font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+.fb button{border:1px solid var(--line);background:#fff;border-radius:6px;padding:1px 8px;font-size:11.5px;color:var(--ink2)}
+.fb button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.fb button.sel{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.fb button:disabled{cursor:default}
+.fb .fix{display:flex;gap:6px;width:100%;margin-top:4px}
+.fb .fix input{flex:1;border:1px solid var(--line);border-radius:6px;padding:4px 8px;font:inherit;font-size:12px}
+.pill.cur{background:#1e3a8a;color:#dbeafe}
+@media (max-width:560px){header.top{padding:10px 12px}.case{margin-left:0}.guide{padding:8px 12px}main{padding:10px 12px;gap:10px}.audit{margin:0 12px 16px}footer{padding:0 12px 16px}.msg{max-width:100%}.para label{margin-left:0}.src{flex-wrap:wrap}.src .r{text-align:left}.kv{grid-template-columns:1fr}.kv dt{margin-top:4px}}
 </style>
 </head>
 <body>
@@ -97,6 +106,7 @@ footer{padding:0 20px 24px;font-size:12px;color:var(--muted)}
   <div class="case">
     <span>Caso <b>2025-0847</b> · Etapa de Análise (MSAC)</span>
     <span class="pill synth">Dados sintéticos</span>
+    <span class="pill cur" id="cur" title="Avaliações enviadas à curadoria da equipe de PLD">Curadoria: 0</span>
     <span class="pill status" id="status">Coleta concluída</span>
   </div>
 </header>
@@ -134,7 +144,7 @@ footer{padding:0 20px 24px;font-size:12px;color:var(--muted)}
       <div class="msg a">Coleta concluída em 11 fontes. Encontrei <b>6 alertas</b>, 3 de severidade alta. Toda resposta minha traz a fonte que a sustenta. O que não consigo citar, não afirmo.</div>
     </div>
     <div class="suggest" id="suggest">
-      <div class="note">Perguntas sugeridas (protótipo roteirizado):</div>
+      <div class="note">Clique numa sugestão ou digite sua pergunta sobre o caso:</div>
     </div>
   </section>
 
@@ -160,7 +170,7 @@ footer{padding:0 20px 24px;font-size:12px;color:var(--muted)}
   <table><thead><tr><th>Hora</th><th>Evento</th><th>Detalhe</th></tr></thead><tbody id="audit"></tbody></table>
 </details>
 
-<footer>Protótipo acadêmico · FIAP MBA Data Science & AI · Discovery 2025.2 · Desafio Banco do Brasil (PLD/FTP-C). Caso integralmente sintético, construído a partir dos exemplos públicos do material de KickOff. Nenhum dado real de cliente foi utilizado. Respostas do agente são roteirizadas para demonstração.</footer>
+<footer>Protótipo acadêmico · FIAP MBA Data Science & AI · Discovery 2025.2 · Desafio Banco do Brasil (PLD/FTP-C). Caso integralmente sintético, construído a partir dos exemplos públicos do material de KickOff. Nenhum dado real de cliente foi utilizado. Respostas do agente são simuladas a partir do caso sintético; as avaliações "Útil / Corrigir" simulam a curadoria contínua pela equipe de PLD.</footer>
 
 <script>
 const ALERTS = [
@@ -168,18 +178,18 @@ const ALERTS = [
   {id:"A2", sev:"alta", t:"Saque em espécie por terceiro em outra praça", d:"R$ 45.000,00 sacados em 05 e 06/09/2025 por M. A. P., em Manaus/AM.", typ:"Depósitos e saques em espécie atípicos"},
   {id:"A3", sev:"alta", t:"Pix pulverizados de remetente incompatível", d:"13 Pix de C. S. O. entre 06 e 15/09/2025, total de R$ 57.000,00. Remetente: auxiliar de escritório.", typ:"Movimentação incompatível com patrimônio e ocupação"},
   {id:"A4", sev:"media", t:"Compra concentrada de cartões pré-pagos", d:"40 gift cards adquiridos em um único dia, 20/08/2025.", typ:"Regra complementar do banco (a confirmar com a área de PLD)"},
-  {id:"A5", sev:"media", t:"Mídia negativa da empresa vinculada", d:"Empresa do analisado noticiada em 07/2025 por suspeita de desvio de verba pública.", typ:"Mídia negativa"},
+  {id:"A5", sev:"media", t:"Empresa vinculada já comunicada", d:"A empresa do analisado foi comunicada recentemente por suspeitas de desvio de verba pública.", typ:"Histórico de comunicações do banco"},
   {id:"A6", sev:"baixa", t:"Vínculo societário", d:"Dirigente de COMERCIAL ALVORADA LTDA, 50% de participação; faturamento presumido de R$ 100.000,00.", typ:"Sócio sem capacidade financeira para o porte declarado (a validar)"}
 ];
 const SOURCES = [
   {id:"S1", n:"Cadastro do cliente (CSC)", r:"Atualizado 03/2025"},
   {id:"S2", n:"Extrato de conta corrente", r:"4 alertas", hit:true},
   {id:"S3", n:"Pix recebidos e enviados", r:"13 créditos de 1 remetente", hit:true},
-  {id:"S4", n:"Histórico de alertas e análises", r:"1 análise anterior, 2023"},
+  {id:"S4", n:"Histórico de alertas e comunicações", r:"1 comunicação · empresa vinculada", hit:true},
   {id:"S5", n:"Receita Federal · CNPJ", r:"1 empresa vinculada", hit:true},
   {id:"S6", n:"Quadro societário (QSA)", r:"50% de participação"},
   {id:"S7", n:"Bureau · faturamento presumido", r:"R$ 100 mil · 09/2025"},
-  {id:"S8", n:"Mídia negativa", r:"1 notícia · 07/2025", hit:true},
+  {id:"S8", n:"Mídia negativa", r:"Nada consta"},
   {id:"S9", n:"Listas restritivas (CSNU, OFAC)", r:"Nada consta"},
   {id:"S10", n:"Pessoa Exposta Politicamente", r:"Não é PEP"},
   {id:"S11", n:"Normativos (Lei 9.613, Circ. 3.978, CC 4.001)", r:"RAG · 3 trechos"}
@@ -188,21 +198,35 @@ const SOURCES = [
 const TAGS = {
   "Extrato 02–19/09":["A1","S2"], "Extrato · saque por terceiro":["A2","S2"], "Extrato 06–15/09":["A3","S2"],
   "Pix · remetente":["A3","S3"], "Cadastro · CSC":["S1"], "Cadastro do remetente":["A3","S1"], "Extrato 20/08":["A4","S2"],
-  "Mídia negativa 07/2025":["A5","S8"], "Receita · CNPJ":["A6","S5"], "QSA":["A6","S6"], "Bureau · faturamento":["A6","S7"],
-  "CC 4.001":["S11"], "Listas · PEP":["S9","S10"], "Histórico de alertas":["S4"]
+  "Histórico de comunicações":["A5","S4"], "Mídia negativa":["S8"], "Receita · CNPJ":["A6","S5"], "QSA":["A6","S6"], "Bureau · faturamento":["A6","S7"],
+  "CC 4.001":["S11"], "Listas · PEP":["S9","S10"]
 };
 const QA = [
-  {q:"Resuma os indícios do caso e a severidade.", a:"Três indícios de severidade alta: <b>saques fracionados em espécie</b> (R$ 50 mil em 40 operações), <b>saque por terceiro em Manaus</b> (R$ 45 mil) e <b>Pix pulverizados</b> de um remetente com ocupação incompatível (R$ 57 mil). Em média severidade, compra de 40 gift cards em um dia e mídia negativa da empresa vinculada. Listas restritivas e PEP: nada consta.", tags:["Extrato 02–19/09","Extrato · saque por terceiro","Pix · remetente","Extrato 20/08","Mídia negativa 07/2025","Listas · PEP"]},
+  {q:"Resuma os indícios do caso e a severidade.", a:"Três indícios de severidade alta: <b>saques fracionados em espécie</b> (R$ 50 mil em 40 operações), <b>saque por terceiro em Manaus</b> (R$ 45 mil) e <b>Pix pulverizados</b> de um remetente com ocupação incompatível (R$ 57 mil). Em média severidade, compra de 40 gift cards em um dia e empresa vinculada já comunicada por suspeita de desvio de verba pública. Listas restritivas, PEP e mídia negativa: nada consta.", tags:["Extrato 02–19/09","Extrato · saque por terceiro","Pix · remetente","Extrato 20/08","Histórico de comunicações","Listas · PEP"]},
   {q:"Quem é C. S. O. e por que os Pix chamam atenção?", a:"C. S. O. é pessoa física cadastrada com ocupação <b>auxiliar de escritório e assemelhados</b>. Enviou 13 Pix ao analisado em 10 dias, R$ 57.000,00 no total, valor incompatível com a ocupação declarada. Corresponde à tipologia de movimentação incompatível com patrimônio e ocupação.", tags:["Pix · remetente","Cadastro do remetente","CC 4.001"]},
   {q:"Os saques de 19/09 foram feitos com o dinheiro desses Pix?", refuse:true, a:"<b>Não tenho fonte que comprove esse vínculo.</b> O extrato mostra que os Pix (06 a 15/09) antecedem os saques de 19/09, mas a conta recebeu outros créditos no período. Posso registrar a sequência temporal como fato; a relação de causa é hipótese para o seu julgamento.", tags:["Extrato 06–15/09","Extrato 02–19/09"]},
   {q:"Gere a minuta no padrão de redação da área.", a:"Minuta gerada com 5 parágrafos, cada um com suas fontes. Ela está marcada como <b>pendente de revisão humana</b>, ao lado.", tags:[], draft:true}
 ];
+// perguntas livres: palavras-chave -> pergunta do roteiro (qa) ou resposta extra
+const INTENTS = [
+  {qa:3, kw:["minuta","redij","redig","redacao","gere","gerar","parecer","relatorio"]},
+  {qa:2, kw:["dinheiro desses pix","vinculo","origem dos saques","mesmo dinheiro","foram feitos com"]},
+  {qa:1, kw:["c. s. o","cso","remetente","quem enviou","quem mandou"]},
+  {qa:0, kw:["resum","indicio","severidade","grave","alerta","principal"]},
+  {kw:["manaus","terceiro","m. a. p","quem sacou"], a:"Saque de <b>R$ 45.000,00</b> em 05 e 06/09/2025, retirado em espécie por <b>M. A. P.</b>, CPF ***.321.654-**, em Manaus/AM. A praça não tem relação com o domicílio do cliente (Rio de Janeiro/RJ) e o recurso sai da conta por mão de terceiro, o que dificulta identificar o beneficiário final.", tags:["Extrato · saque por terceiro","Cadastro · CSC"]},
+  {kw:["empresa","cnpj","alvorada","socio","faturamento"], a:"O analisado é dirigente da <b>COMERCIAL ALVORADA LTDA</b> (50% de participação), comércio varejista aberto em 2006, com faturamento presumido de R$ 100.000,00 (09/2025). A empresa foi <b>comunicada recentemente</b> por suspeitas de desvio de verba pública, conforme o histórico de comunicações.", tags:["Receita · CNPJ","QSA","Bureau · faturamento","Histórico de comunicações"]},
+  {kw:["gift","cartao","cartoes","pre-pago","prepago"], a:"Em <b>20/08/2025</b> o analisado comprou <b>40 gift cards</b> num único dia. A compra concentrada de cartões pré-pagos converte recursos em ativos de difícil rastreio; o enquadramento depende de regra complementar a confirmar com a área de PLD.", tags:["Extrato 20/08"]},
+  {kw:["tipologia","carta circular","4.001","4001","norma"], a:"Três padrões se enquadram na Carta Circular 4.001/2020: <b>fragmentação de saques</b> em espécie, <b>saques em espécie atípicos</b> por terceiro em outra praça e <b>movimentação incompatível</b> com patrimônio e ocupação (Pix de C. S. O.). A detecção é feita por regras determinísticas; eu apenas explico e cito.", tags:["CC 4.001","Extrato 02–19/09","Extrato · saque por terceiro","Pix · remetente"]},
+  {kw:["pep"," lista","ofac","csnu","sancion","midia"], a:"Listas restritivas (CSNU, OFAC): <b>nada consta</b>. Pessoa Exposta Politicamente: <b>não é PEP</b>. Mídia negativa: <b>nada consta</b>.", tags:["Listas · PEP","Mídia negativa"]}
+];
+function norm(t){return " "+t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[?!,;:]/g," ")+" "}
+function classify(t){const n=norm(t); let best=null,score=0; INTENTS.forEach(x=>{const s=x.kw.filter(k=>n.includes(k)).length; if(s>score){score=s;best=x}}); return best}
 const DRAFT = [
   {t:"Em consulta a fontes externas, consta como dirigente da empresa COMERCIAL ALVORADA LTDA, CNPJ: 12.345.678/0001-90, atividade de comércio varejista de artigos diversos. Faturamento presumido de R$ 100.000,00, referência: 09/2025. Empresa aberta em 01/01/2006 (participação societária de 50%).", tags:["Receita · CNPJ","QSA","Bureau · faturamento"]},
   {t:"Identificamos a prática atípica de saques efetuados em espécie, de valores baixos, efetuados na cidade do Rio de Janeiro/RJ, de maneira que não seja possível identificar a destinação final dos recursos, citamos como exemplos: 02/09/2025 - 10 saques totalizando R$ 15.000,00; 03/09/2025 - 10 saques totalizando R$ 15.000,00; 19/09/2025 - 20 saques totalizando R$ 20.000,00.", tags:["Extrato 02–19/09","CC 4.001"]},
   {t:"Realizou saques no valor total de R$ 45.000,00 nos dias 05/09 e 06/09/2025, retirados em espécie por M. A. P., CPF: ***.321.654-**, efetuados em Manaus/AM.", tags:["Extrato · saque por terceiro"]},
   {t:"Destacamos a movimentação atípica realizada entre os dias 06/09/2025 e 15/09/2025, em que o analisado recebeu 13 Pix no total de R$ 57.000,00 de C. S. O., CPF: ***.789.012-**, ocupação auxiliar de escritório e assemelhados.", tags:["Extrato 06–15/09","Cadastro do remetente"]},
-  {t:"Movimentação atípica, em que o analisado comprou em um único dia, 20/08/2025, 40 gift cards. Registre-se que a empresa do analisado foi noticiada recentemente por suspeitas de desvio de verba pública.", tags:["Extrato 20/08","Mídia negativa 07/2025"]}
+  {t:"Movimentação atípica, em que o analisado comprou em um único dia, 20/08/2025, 40 gift cards. Registre-se que a empresa do analisado foi comunicada recentemente por suspeitas de desvio de verba pública.", tags:["Extrato 20/08","Histórico de comunicações"]}
 ];
 
 const $ = s => document.querySelector(s);
@@ -218,14 +242,28 @@ SOURCES.forEach(s=>log("Consulta a fonte", s.n+" → "+s.r));
 
 const sug = $("#suggest");
 QA.forEach((x,i)=>sug.insertAdjacentHTML("beforeend",`<button class="q" data-i="${i}"><span class="k">${i+1}</span>${x.q}</button>`));
-sug.insertAdjacentHTML("beforeend",`<form class="ask" id="ask"><input id="free" placeholder="Pergunte algo fora do roteiro…" aria-label="Pergunta livre"><button>Enviar</button></form>`);
+sug.insertAdjacentHTML("beforeend",`<form class="ask" id="ask"><input id="free" placeholder="Pergunte sobre o caso, ex.: quem sacou em Manaus?" aria-label="Pergunta livre" maxlength="300"><button>Enviar</button></form>`);
 
-function addMsg(cls, html){const c=$("#chat"); c.insertAdjacentHTML("beforeend",`<div class="msg ${cls}">${html}</div>`); c.scrollTop=c.scrollHeight}
-function ask(i, instant){
+let nMsg=0, nCur=0;
+function addMsg(cls, html, fb){const c=$("#chat"); const id="m"+(++nMsg);
+  const f = fb ? `<div class="fb" data-m="${id}">Esta resposta ajudou? <button data-fb="ok">Útil</button><button data-fb="fix">Corrigir</button></div>` : "";
+  c.insertAdjacentHTML("beforeend",`<div class="msg ${cls}" id="${id}">${html}${f}</div>`); c.scrollTop=c.scrollHeight}
+function bumpCur(){$("#cur").textContent="Curadoria: "+(++nCur)}
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-fb]"); if(!b) return; const box=b.closest(".fb");
+  if(b.dataset.fb==="ok"){ box.querySelectorAll("button").forEach(x=>x.disabled=true); b.classList.add("sel"); bumpCur(); log("Curadoria: resposta avaliada como útil", "Resposta "+box.dataset.m.slice(1)); }
+  else if(b.dataset.fb==="fix" && !box.querySelector(".fix")){ box.insertAdjacentHTML("beforeend",`<form class="fix"><input maxlength="300" placeholder="Descreva a correção para a equipe de PLD" aria-label="Correção"><button>Enviar</button></form>`); box.querySelector(".fix input").focus(); }
+});
+document.addEventListener("submit", e=>{
+  const f=e.target.closest(".fix"); if(!f) return; e.preventDefault(); const box=f.closest(".fb"); const v=f.querySelector("input").value.trim()||"(sem comentário)";
+  f.remove(); box.querySelectorAll("button").forEach(x=>x.disabled=true); box.querySelector('[data-fb="fix"]').classList.add("sel");
+  box.insertAdjacentHTML("beforeend",`<span>Correção enviada à curadoria.</span>`); bumpCur(); log("Curadoria: correção enviada", v.replace(/</g,"&lt;"));
+});
+function ask(i, instant, typed){
   const x = QA[i]; const btn = sug.querySelector(`[data-i="${i}"]`); btn.disabled = true;
-  addMsg("u", x.q); log("Pergunta ao agente", x.q); setStep(x.draft?3:2);
+  const q = typed || x.q; addMsg("u", q.replace(/</g,"&lt;")); log(typed?"Pergunta livre":"Pergunta ao agente", q); setStep(x.draft?3:2);
   const reply = ()=>{
-    addMsg("a"+(x.refuse?" refuse":""), x.a + (x.tags.length?`<div class="tags">${x.tags.map(tagHTML).join("")}</div>`:""));
+    addMsg("a"+(x.refuse?" refuse":""), x.a + (x.tags.length?`<div class="tags">${x.tags.map(tagHTML).join("")}</div>`:""), true);
     log(x.refuse?"Resposta sem afirmação (sem fonte)":"Resposta com citação", x.tags.join(", ")||"minuta");
     if (x.draft) renderDraft();
   };
@@ -234,9 +272,17 @@ function ask(i, instant){
   setTimeout(()=>{$("#typing").remove(); reply()}, 900);
 }
 sug.addEventListener("click", e=>{const b=e.target.closest(".q"); if(b && !b.disabled) ask(+b.dataset.i)});
-$("#ask").addEventListener("submit", e=>{e.preventDefault(); const v=$("#free").value.trim(); if(!v) return; $("#free").value="";
-  addMsg("u", v.replace(/</g,"&lt;")); log("Pergunta livre", v);
-  setTimeout(()=>{addMsg("a refuse","<b>Não encontrei fonte entre as 11 consultadas para responder com segurança.</b> Neste protótipo, as respostas são roteirizadas; na solução, o agente consultaria as fontes e, sem evidência, continuaria sem afirmar."); log("Resposta sem afirmação (sem fonte)", "pergunta livre")},700)});
+function freeAsk(v, instant){
+  const it = classify(v);
+  if (it && it.qa!==undefined) return ask(it.qa, instant, v);
+  addMsg("u", v.replace(/</g,"&lt;")); log("Pergunta livre", v); setStep(2);
+  const reply = it
+    ? ()=>{addMsg("a", it.a+`<div class="tags">${it.tags.map(tagHTML).join("")}</div>`, true); log("Resposta com citação", it.tags.join(", "))}
+    : ()=>{addMsg("a refuse","<b>Não encontrei isso nas fontes do caso e não respondo sem fonte.</b> Neste protótipo conheço apenas o caso sintético 2025-0847. Pergunte, por exemplo, sobre os saques em Manaus, o remetente dos Pix, a empresa do analisado, os gift cards ou as tipologias, ou peça a minuta.", true); log("Resposta sem afirmação (sem fonte)", "pergunta fora das fontes")};
+  if (instant) return reply();
+  setTimeout(reply, 700);
+}
+$("#ask").addEventListener("submit", e=>{e.preventDefault(); const v=$("#free").value.trim(); if(!v) return; $("#free").value=""; freeAsk(v)});
 
 function renderDraft(){
   $("#draft").innerHTML = `<div class="meta"><span>Gerada em <b>4 min</b></span><span><b>11</b> fontes consultadas</span><span><b>5</b> parágrafos</span><span><b>100%</b> com fonte</span></div>` +
@@ -272,10 +318,14 @@ $("#return").addEventListener("click", ()=>{
 // ?demo=N monta o estado da etapa N (para capturas de tela)
 const demo = +new URLSearchParams(location.search).get("demo");
 window.keepHL = demo===5;
-if (demo>=2){ ask(0,true); ask(1,true); ask(2,true); }
-if (demo>=3){ ask(3,true); }
-if (demo>=4){ document.querySelectorAll("[data-p]").forEach((c,i)=>{ if(i<3){c.checked=true; c.dispatchEvent(new Event("change",{bubbles:true}))} });
+if (demo===6){ freeAsk("quem sacou em Manaus?",true); freeAsk("o que a empresa dele tem de estranho?",true); freeAsk("qual a previsão do tempo amanhã?",true);
+  setTimeout(()=>{document.querySelector('#m2 [data-fb="ok"]')?.click(); document.querySelector('#m6 [data-fb="fix"]')?.click(); const i=document.querySelector(".fix input"); if(i) i.value="Sugerir outra pergunta sobre o caso";},50); }
+const D5 = demo<=5;
+if (demo>=2 && D5){ ask(0,true); ask(1,true); ask(2,true); }
+if (demo>=3 && D5){ ask(3,true); }
+if (demo>=4 && D5){ document.querySelectorAll("[data-p]").forEach((c,i)=>{ if(i<3){c.checked=true; c.dispatchEvent(new Event("change",{bubbles:true}))} });
   setTimeout(()=>document.querySelector(demo===5?'#P3 .tag':'#P1 .tag').click(),50); }
+if (demo) setTimeout(()=>window.scrollTo(0,0),150);
 </script>
 </body>
 </html>
