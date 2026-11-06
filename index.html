@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check · Estação do Analista</title>
+<style>
+:root{
+  --bg:#f4f5f7; --panel:#ffffff; --ink:#14213d; --ink2:#4a5568; --muted:#8a94a6;
+  --line:#e2e6ec; --accent:#0f766e; --accent-soft:#e6f4f2; --warn:#b45309; --warn-soft:#fdf3e4;
+  --high:#b91c1c; --high-soft:#fdecec; --mid:#b45309; --mid-soft:#fdf3e4; --low:#475569; --low-soft:#eef1f5;
+  --hl:#fff3b0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+button{font:inherit;cursor:pointer}
+header.top{display:flex;align-items:center;gap:16px;padding:10px 20px;background:var(--ink);color:#fff;flex-wrap:wrap}
+.brand{font-weight:700;font-size:20px;letter-spacing:.5px}
+.brand span{color:#5eead4}
+.tagline{font-size:12px;opacity:.75}
+.case{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}
+.pill{border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.synth{background:#334155;color:#e2e8f0}
+.pill.status{background:var(--warn-soft);color:var(--warn)}
+.pill.status.ok{background:var(--accent-soft);color:var(--accent)}
+.guide{display:flex;gap:8px;padding:10px 20px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+.guide b{font-size:12px;color:var(--ink2);margin-right:4px}
+.step{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;color:var(--ink2);font-size:13px}
+.step.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+.step.done{color:var(--accent)}
+.step.done::before{content:"✓ "}
+main{display:grid;grid-template-columns:minmax(300px,1fr) minmax(340px,1.15fr) minmax(360px,1.3fr);gap:14px;padding:14px 20px 20px}
+@media (max-width:1100px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-height:0}
+.panel>h2{margin:0;padding:12px 16px;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink2);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.panel>h2 .n{background:var(--ink);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-grid;place-items:center;font-size:11px}
+.body{padding:14px 16px;overflow:auto}
+.cols{display:flex;flex-direction:column;gap:14px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+h3{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:16px 0 8px}
+.alert{border:1px solid var(--line);border-left:4px solid var(--low);border-radius:8px;padding:9px 11px;margin-bottom:8px;transition:background .3s,box-shadow .3s}
+.alert.alta{border-left-color:var(--high)} .alert.media{border-left-color:var(--mid)}
+.alert .row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.alert .t{font-weight:600;font-size:13px}
+.sev{font-size:11px;font-weight:700;border-radius:4px;padding:1px 6px;white-space:nowrap}
+.sev.alta{background:var(--high-soft);color:var(--high)} .sev.media{background:var(--mid-soft);color:var(--mid)} .sev.baixa{background:var(--low-soft);color:var(--low)}
+.alert .d{font-size:12.5px;color:var(--ink2);margin-top:3px}
+.alert .typ{font-size:11.5px;color:var(--accent);margin-top:4px}
+.hl{background:var(--hl)!important;box-shadow:0 0 0 2px #facc15}
+.src{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:5px 8px;border-radius:6px;transition:background .3s}
+.src:nth-child(odd){background:#f8f9fb}
+.src .r{color:var(--muted);text-align:right}
+.src .r.hit{color:var(--high);font-weight:600}
+.chat{display:flex;flex-direction:column;gap:10px;flex:1}
+.msg{max-width:92%;padding:9px 12px;border-radius:12px;font-size:13.5px}
+.msg.u{align-self:flex-end;background:var(--ink);color:#fff;border-bottom-right-radius:4px}
+.msg.a{align-self:flex-start;background:#f1f4f8;border-bottom-left-radius:4px}
+.msg.a.refuse{background:var(--warn-soft)}
+.msg .tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.tag{border:1px solid #b6d9d4;background:var(--accent-soft);color:var(--accent);border-radius:5px;padding:1px 7px;font-size:11.5px;font-weight:600}
+.tag:hover{background:#cdebe6}
+.typing{color:var(--muted);font-style:italic;font-size:13px}
+.suggest{display:flex;flex-direction:column;gap:6px;padding:12px 16px;border-top:1px solid var(--line)}
+.suggest .q{text-align:left;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;font-size:13px;color:var(--ink)}
+.suggest .q:hover:not(:disabled){border-color:var(--accent)}
+.suggest .q:disabled{opacity:.45;cursor:default}
+.suggest .q .k{color:var(--accent);font-weight:700;margin-right:6px}
+.ask{display:flex;gap:6px;margin-top:4px}
+.ask input{flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit}
+.ask button{border:0;background:var(--ink);color:#fff;border-radius:8px;padding:7px 12px}
+.empty{color:var(--muted);text-align:center;padding:40px 10px;font-size:13px}
+.meta{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-bottom:10px}
+.meta b{color:var(--ink)}
+.para{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:9px;font-size:13.5px;transition:background .3s}
+.para .tags{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.para label{margin-left:auto;font-size:12px;color:var(--ink2);display:flex;gap:4px;align-items:center}
+.para.ok{border-color:#9fd6cf;background:#f7fcfb}
+.review{border-top:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.review .btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.note{font-size:12px;color:var(--ink2)}
+.lock{font-size:12px;background:#f1f4f8;border-radius:8px;padding:8px 10px;color:var(--ink2)}
+.audit{margin:0 20px 24px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.audit summary{padding:12px 16px;cursor:pointer;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink2)}
+.audit table{width:100%;border-collapse:collapse;font-size:12.5px}
+.audit th,.audit td{text-align:left;padding:6px 16px;border-top:1px solid var(--line)}
+.audit th{color:var(--muted);font-weight:600}
+footer{padding:0 20px 24px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div><div class="brand">Check<span>.</span></div><div class="tagline">Da suspeita à comunicação, com rastro de evidência</div></div>
+  <div class="case">
+    <span>Caso <b>2025-0847</b> · Etapa de Análise (MSAC)</span>
+    <span class="pill synth">Dados sintéticos</span>
+    <span class="pill status" id="status">Coleta concluída</span>
+  </div>
+</header>
+
+<nav class="guide" aria-label="Roteiro de demonstração">
+  <b>Roteiro:</b>
+  <span class="step on" id="g1">1 · Evidência</span>
+  <span class="step" id="g2">2 · Agente</span>
+  <span class="step" id="g3">3 · Minuta</span>
+  <span class="step" id="g4">4 · Revisão</span>
+</nav>
+
+<main>
+  <!-- EVIDÊNCIA -->
+  <section class="panel">
+    <h2><span class="n">1</span> Evidência reunida</h2>
+    <div class="body">
+      <dl class="kv">
+        <dt>Analisado</dt><dd>R. M. L. · CPF ***.456.789-**</dd>
+        <dt>Ocupação</dt><dd>Empresário · renda declarada R$ 8.500/mês</dd>
+        <dt>Cliente desde</dt><dd>2012 · agência Rio de Janeiro/RJ</dd>
+        <dt>Origem</dt><dd>Seleção por regra de fragmentação de saques</dd>
+      </dl>
+      <h3>Alertas classificados (6)</h3>
+      <div id="alerts"></div>
+      <h3>Fontes consultadas (11) · 38 s</h3>
+      <div id="sources"></div>
+    </div>
+  </section>
+
+  <!-- AGENTE -->
+  <section class="panel">
+    <h2><span class="n">2</span> Agente do caso</h2>
+    <div class="body chat" id="chat">
+      <div class="msg a">Coleta concluída em 11 fontes. Encontrei <b>6 alertas</b>, 3 de severidade alta. Toda resposta minha traz a fonte que a sustenta. O que não consigo citar, não afirmo.</div>
+    </div>
+    <div class="suggest" id="suggest">
+      <div class="note">Perguntas sugeridas (protótipo roteirizado):</div>
+    </div>
+  </section>
+
+  <!-- MINUTA -->
+  <section class="panel">
+    <h2><span class="n">3</span> Minuta de análise</h2>
+    <div class="body" id="draft">
+      <div class="empty">A minuta aparece aqui quando você pedir ao agente.<br>Use a pergunta <b>4</b>.</div>
+    </div>
+    <div class="review" id="review" hidden>
+      <div class="note"><b>4 · Revisão humana.</b> Confira cada parágrafo e marque. A aprovação só fica disponível com todos conferidos.</div>
+      <div class="btns">
+        <button class="btn primary" id="approve" disabled>Concluir revisão</button>
+        <button class="btn" id="return">Devolver ao agente</button>
+      </div>
+      <div class="lock">O Check não envia comunicação ao COAF nem encerra o caso. Essas decisões são do analista e da 2ª linha de defesa, no sistema oficial da área.</div>
+    </div>
+  </section>
+</main>
+
+<details class="audit" id="auditBox">
+  <summary>Trilha de auditoria (<span id="auditCount">0</span> registros)</summary>
+  <table><thead><tr><th>Hora</th><th>Evento</th><th>Detalhe</th></tr></thead><tbody id="audit"></tbody></table>
+</details>
+
+<footer>Protótipo acadêmico · FIAP MBA Data Science & AI · Discovery 2025.2 · Desafio Banco do Brasil (PLD/FTP-C). Caso integralmente sintético, construído a partir dos exemplos públicos do material de KickOff. Nenhum dado real de cliente foi utilizado. Respostas do agente são roteirizadas para demonstração.</footer>
+
+<script>
+const ALERTS = [
+  {id:"A1", sev:"alta", t:"Saques fracionados em espécie", d:"40 saques de valor baixo em 02, 03 e 19/09/2025, total de R$ 50.000,00, no Rio de Janeiro/RJ.", typ:"Fragmentação de saques para burlar limites de reporte"},
+  {id:"A2", sev:"alta", t:"Saque em espécie por terceiro em outra praça", d:"R$ 45.000,00 sacados em 05 e 06/09/2025 por M. A. P., em Manaus/AM.", typ:"Depósitos e saques em espécie atípicos"},
+  {id:"A3", sev:"alta", t:"Pix pulverizados de remetente incompatível", d:"13 Pix de C. S. O. entre 06 e 15/09/2025, total de R$ 57.000,00. Remetente: auxiliar de escritório.", typ:"Movimentação incompatível com patrimônio e ocupação"},
+  {id:"A4", sev:"media", t:"Compra concentrada de cartões pré-pagos", d:"40 gift cards adquiridos em um único dia, 20/08/2025.", typ:"Regra complementar do banco (a confirmar com a área de PLD)"},
+  {id:"A5", sev:"media", t:"Mídia negativa da empresa vinculada", d:"Empresa do analisado noticiada em 07/2025 por suspeita de desvio de verba pública.", typ:"Mídia negativa"},
+  {id:"A6", sev:"baixa", t:"Vínculo societário", d:"Dirigente de COMERCIAL ALVORADA LTDA, 50% de participação; faturamento presumido de R$ 100.000,00.", typ:"Sócio sem capacidade financeira para o porte declarado (a validar)"}
+];
+const SOURCES = [
+  {id:"S1", n:"Cadastro do cliente (CSC)", r:"Atualizado 03/2025"},
+  {id:"S2", n:"Extrato de conta corrente", r:"4 alertas", hit:true},
+  {id:"S3", n:"Pix recebidos e enviados", r:"13 créditos de 1 remetente", hit:true},
+  {id:"S4", n:"Histórico de alertas e análises", r:"1 análise anterior, 2023"},
+  {id:"S5", n:"Receita Federal · CNPJ", r:"1 empresa vinculada", hit:true},
+  {id:"S6", n:"Quadro societário (QSA)", r:"50% de participação"},
+  {id:"S7", n:"Bureau · faturamento presumido", r:"R$ 100 mil · 09/2025"},
+  {id:"S8", n:"Mídia negativa", r:"1 notícia · 07/2025", hit:true},
+  {id:"S9", n:"Listas restritivas (CSNU, OFAC)", r:"Nada consta"},
+  {id:"S10", n:"Pessoa Exposta Politicamente", r:"Não é PEP"},
+  {id:"S11", n:"Normativos (Lei 9.613, Circ. 3.978, CC 4.001)", r:"RAG · 3 trechos"}
+];
+// fonte de cada etiqueta -> elementos que acendem
+const TAGS = {
+  "Extrato 02–19/09":["A1","S2"], "Extrato · saque por terceiro":["A2","S2"], "Extrato 06–15/09":["A3","S2"],
+  "Pix · remetente":["A3","S3"], "Cadastro · CSC":["S1"], "Cadastro do remetente":["A3","S1"], "Extrato 20/08":["A4","S2"],
+  "Mídia negativa 07/2025":["A5","S8"], "Receita · CNPJ":["A6","S5"], "QSA":["A6","S6"], "Bureau · faturamento":["A6","S7"],
+  "CC 4.001":["S11"], "Listas · PEP":["S9","S10"], "Histórico de alertas":["S4"]
+};
+const QA = [
+  {q:"Resuma os indícios do caso e a severidade.", a:"Três indícios de severidade alta: <b>saques fracionados em espécie</b> (R$ 50 mil em 40 operações), <b>saque por terceiro em Manaus</b> (R$ 45 mil) e <b>Pix pulverizados</b> de um remetente com ocupação incompatível (R$ 57 mil). Em média severidade, compra de 40 gift cards em um dia e mídia negativa da empresa vinculada. Listas restritivas e PEP: nada consta.", tags:["Extrato 02–19/09","Extrato · saque por terceiro","Pix · remetente","Extrato 20/08","Mídia negativa 07/2025","Listas · PEP"]},
+  {q:"Quem é C. S. O. e por que os Pix chamam atenção?", a:"C. S. O. é pessoa física cadastrada com ocupação <b>auxiliar de escritório e assemelhados</b>. Enviou 13 Pix ao analisado em 10 dias, R$ 57.000,00 no total, valor incompatível com a ocupação declarada. Corresponde à tipologia de movimentação incompatível com patrimônio e ocupação.", tags:["Pix · remetente","Cadastro do remetente","CC 4.001"]},
+  {q:"Os saques de 19/09 foram feitos com o dinheiro desses Pix?", refuse:true, a:"<b>Não tenho fonte que comprove esse vínculo.</b> O extrato mostra que os Pix (06 a 15/09) antecedem os saques de 19/09, mas a conta recebeu outros créditos no período. Posso registrar a sequência temporal como fato; a relação de causa é hipótese para o seu julgamento.", tags:["Extrato 06–15/09","Extrato 02–19/09"]},
+  {q:"Gere a minuta no padrão de redação da área.", a:"Minuta gerada com 5 parágrafos, cada um com suas fontes. Ela está marcada como <b>pendente de revisão humana</b>, ao lado.", tags:[], draft:true}
+];
+const DRAFT = [
+  {t:"Em consulta a fontes externas, consta como dirigente da empresa COMERCIAL ALVORADA LTDA, CNPJ: 12.345.678/0001-90, atividade de comércio varejista de artigos diversos. Faturamento presumido de R$ 100.000,00, referência: 09/2025. Empresa aberta em 01/01/2006 (participação societária de 50%).", tags:["Receita · CNPJ","QSA","Bureau · faturamento"]},
+  {t:"Identificamos a prática atípica de saques efetuados em espécie, de valores baixos, efetuados na cidade do Rio de Janeiro/RJ, de maneira que não seja possível identificar a destinação final dos recursos, citamos como exemplos: 02/09/2025 - 10 saques totalizando R$ 15.000,00; 03/09/2025 - 10 saques totalizando R$ 15.000,00; 19/09/2025 - 20 saques totalizando R$ 20.000,00.", tags:["Extrato 02–19/09","CC 4.001"]},
+  {t:"Realizou saques no valor total de R$ 45.000,00 nos dias 05/09 e 06/09/2025, retirados em espécie por M. A. P., CPF: ***.321.654-**, efetuados em Manaus/AM.", tags:["Extrato · saque por terceiro"]},
+  {t:"Destacamos a movimentação atípica realizada entre os dias 06/09/2025 e 15/09/2025, em que o analisado recebeu 13 Pix no total de R$ 57.000,00 de C. S. O., CPF: ***.789.012-**, ocupação auxiliar de escritório e assemelhados.", tags:["Extrato 06–15/09","Cadastro do remetente"]},
+  {t:"Movimentação atípica, em que o analisado comprou em um único dia, 20/08/2025, 40 gift cards. Registre-se que a empresa do analisado foi noticiada recentemente por suspeitas de desvio de verba pública.", tags:["Extrato 20/08","Mídia negativa 07/2025"]}
+];
+
+const $ = s => document.querySelector(s);
+const audit = [];
+function now(){return new Date().toLocaleTimeString("pt-BR")}
+function log(ev, det){audit.push([now(),ev,det]); $("#audit").insertAdjacentHTML("beforeend",`<tr><td>${audit.at(-1)[0]}</td><td>${ev}</td><td>${det}</td></tr>`); $("#auditCount").textContent=audit.length}
+function tagHTML(t){return `<button class="tag" data-tag="${t}" title="Ver a evidência">${t}</button>`}
+function setStep(n){for(let i=1;i<=4;i++){const g=$("#g"+i);g.classList.toggle("on",i===n);g.classList.toggle("done",i<n)}}
+
+$("#alerts").innerHTML = ALERTS.map(a=>`<div class="alert ${a.sev}" id="${a.id}"><div class="row"><span class="t">${a.t}</span><span class="sev ${a.sev}">${a.sev==="media"?"MÉDIA":a.sev.toUpperCase()}</span></div><div class="d">${a.d}</div><div class="typ">Tipologia: ${a.typ}</div></div>`).join("");
+$("#sources").innerHTML = SOURCES.map(s=>`<div class="src" id="${s.id}"><span>${s.n}</span><span class="r ${s.hit?"hit":""}">${s.r}</span></div>`).join("");
+SOURCES.forEach(s=>log("Consulta a fonte", s.n+" → "+s.r));
+
+const sug = $("#suggest");
+QA.forEach((x,i)=>sug.insertAdjacentHTML("beforeend",`<button class="q" data-i="${i}"><span class="k">${i+1}</span>${x.q}</button>`));
+sug.insertAdjacentHTML("beforeend",`<form class="ask" id="ask"><input id="free" placeholder="Pergunte algo fora do roteiro…" aria-label="Pergunta livre"><button>Enviar</button></form>`);
+
+function addMsg(cls, html){const c=$("#chat"); c.insertAdjacentHTML("beforeend",`<div class="msg ${cls}">${html}</div>`); c.scrollTop=c.scrollHeight}
+function ask(i, instant){
+  const x = QA[i]; const btn = sug.querySelector(`[data-i="${i}"]`); btn.disabled = true;
+  addMsg("u", x.q); log("Pergunta ao agente", x.q); setStep(x.draft?3:2);
+  const reply = ()=>{
+    addMsg("a"+(x.refuse?" refuse":""), x.a + (x.tags.length?`<div class="tags">${x.tags.map(tagHTML).join("")}</div>`:""));
+    log(x.refuse?"Resposta sem afirmação (sem fonte)":"Resposta com citação", x.tags.join(", ")||"minuta");
+    if (x.draft) renderDraft();
+  };
+  if (instant) return reply();
+  const c=$("#chat"); c.insertAdjacentHTML("beforeend",`<div class="typing" id="typing">Consultando fontes…</div>`); c.scrollTop=c.scrollHeight;
+  setTimeout(()=>{$("#typing").remove(); reply()}, 900);
+}
+sug.addEventListener("click", e=>{const b=e.target.closest(".q"); if(b && !b.disabled) ask(+b.dataset.i)});
+$("#ask").addEventListener("submit", e=>{e.preventDefault(); const v=$("#free").value.trim(); if(!v) return; $("#free").value="";
+  addMsg("u", v.replace(/</g,"&lt;")); log("Pergunta livre", v);
+  setTimeout(()=>{addMsg("a refuse","<b>Não encontrei fonte entre as 11 consultadas para responder com segurança.</b> Neste protótipo, as respostas são roteirizadas; na solução, o agente consultaria as fontes e, sem evidência, continuaria sem afirmar."); log("Resposta sem afirmação (sem fonte)", "pergunta livre")},700)});
+
+function renderDraft(){
+  $("#draft").innerHTML = `<div class="meta"><span>Gerada em <b>4 min</b></span><span><b>11</b> fontes consultadas</span><span><b>5</b> parágrafos</span><span><b>100%</b> com fonte</span></div>` +
+    DRAFT.map((p,i)=>`<div class="para" id="P${i}">${p.t}<div class="tags">${p.tags.map(tagHTML).join("")}<label><input type="checkbox" data-p="${i}"> conferido</label></div></div>`).join("");
+  $("#review").hidden = false; $("#status").textContent = "Pendente de revisão humana"; setStep(4);
+  log("Minuta gerada", "5 parágrafos · status: pendente de revisão humana");
+}
+document.addEventListener("click", e=>{
+  const t = e.target.closest(".tag"); if(!t) return;
+  const ids = TAGS[t.dataset.tag]||[];
+  document.querySelectorAll(".hl").forEach(x=>x.classList.remove("hl"));
+  ids.forEach((id,k)=>{const el=document.getElementById(id); if(el){el.classList.add("hl"); if(k===0) el.scrollIntoView({behavior:"smooth",block:"nearest"})}});
+  const p = t.closest(".para"); if(p) p.classList.add("hl");
+  if (!window.keepHL) setTimeout(()=>document.querySelectorAll(".hl").forEach(x=>x.classList.remove("hl")), 2600);
+  log("Verificação de fonte", t.dataset.tag);
+});
+document.addEventListener("change", e=>{
+  if(!e.target.matches("[data-p]")) return;
+  const p = $("#P"+e.target.dataset.p); p.classList.toggle("ok", e.target.checked);
+  log(e.target.checked?"Parágrafo conferido":"Conferência desfeita", "Parágrafo "+(+e.target.dataset.p+1));
+  $("#approve").disabled = document.querySelectorAll("[data-p]:checked").length < DRAFT.length;
+});
+$("#approve").addEventListener("click", ()=>{
+  $("#status").textContent = "Revisada pelo analista · aguardando 2ª linha"; $("#status").classList.add("ok");
+  $("#approve").disabled = true; document.querySelectorAll(".g4,#g4").forEach(g=>g.classList.add("done"));
+  log("Revisão concluída", "Analista conferiu 5/5 parágrafos. Nenhuma comunicação enviada ao COAF.");
+});
+$("#return").addEventListener("click", ()=>{
+  log("Minuta devolvida ao agente", "Analista solicitou ajuste");
+  addMsg("a","Minuta devolvida. Indique o parágrafo e o ajuste; manterei as citações de cada frase.");
+});
+
+// ?demo=N monta o estado da etapa N (para capturas de tela)
+const demo = +new URLSearchParams(location.search).get("demo");
+window.keepHL = demo===5;
+if (demo>=2){ ask(0,true); ask(1,true); ask(2,true); }
+if (demo>=3){ ask(3,true); }
+if (demo>=4){ document.querySelectorAll("[data-p]").forEach((c,i)=>{ if(i<3){c.checked=true; c.dispatchEvent(new Event("change",{bubbles:true}))} });
+  setTimeout(()=>document.querySelector(demo===5?'#P3 .tag':'#P1 .tag').click(),50); }
+</script>
+</body>
+</html>
